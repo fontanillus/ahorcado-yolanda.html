@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Ahorcado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Space Grotesk', 'sans-serif'], mono: ['DM Mono', 'monospace'] } } } };
+    </script>
+</head>
+
+<body class="min-h-[100dvh] bg-[#090b18] bg-[radial-gradient(#242848_1px,transparent_1px)] [background-size:20px_20px] font-sans text-[#eefaff]">
+    <div class="mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col px-4 py-[clamp(8px,2dvh,24px)] sm:px-8 [@media(max-height:650px)]:py-2">
+        <header class="flex shrink-0 items-center justify-between gap-4 border-b-2 border-[#38f5ff] pb-2.5 [@media(max-height:650px)]:gap-2 [@media(max-height:650px)]:pb-2">
+            <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+                <div class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[#c6ff00] text-[#090b18] shadow-[0_0_24px_#c6ff0030] text-lg font-black">AH</div>
+                <div>
+                    <p class="text-xs font-bold uppercase text-[#c6ff00]">Juego de palabras</p>
+                    <h1 class="mt-0.5 text-2xl font-bold sm:text-3xl [@media(max-height:650px)]:!text-xl">El Ahorcado</h1>
+                </div>
+            </div>
+            <button class="shrink-0 rounded-lg bg-[#ff3bd4] shadow-[0_0_24px_#ff3bd440] px-3 py-3 text-sm font-bold text-[#090b18] hover:bg-[#ff79e3] focus:outline-none focus:ring-2 focus:ring-[#38f5ff] focus:ring-offset-2 focus:ring-offset-[#090b18] sm:px-5 [@media(max-height:650px)]:!p-2.5 [@media(max-height:650px)]:!text-xs" onclick="empezar()">Nueva partida</button>
+        </header>
+
+        <main class="mt-3 grid min-h-0 flex-1 content-center gap-3 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-6 min-[600px]:landscape:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] min-[600px]:landscape:gap-6 [@media(max-height:650px)]:!mt-2 [@media(max-height:650px)]:!gap-2 min-[600px]:landscape:[@media(max-height:450px)]:!gap-4">
+            <section aria-label="Dibujo del ahorcado" class="relative flex h-[clamp(90px,22dvh,220px)] min-h-0 items-center justify-center overflow-hidden rounded-lg border-2 border-[#38f5ff] bg-[#11142b] bg-[radial-gradient(#2b3153_1px,transparent_1px)] [background-size:18px_18px] p-2 md:h-full md:min-h-[280px] min-[600px]:landscape:h-full min-[600px]:landscape:min-h-[280px] [@media(max-height:650px)]:!min-h-0">
+                <p class="absolute left-3 top-2 text-[10px] font-bold uppercase text-[#c6ff00]">Intentos en juego</p>
+                <svg id="svg-ahorcado" class="block h-full w-auto max-w-full md:max-h-[min(55dvh,390px)] min-[600px]:landscape:max-h-[min(55dvh,390px)]" viewBox="0 0 200 250" aria-hidden="true">
+                    <line x1="10" y1="240" x2="150" y2="240" class="stroke-[#38f5ff]/60 stroke-[4px]" />
+                    <line x1="40" y1="240" x2="40" y2="20" class="stroke-[#38f5ff]/60 stroke-[4px]" />
+                    <line x1="40" y1="20" x2="120" y2="20" class="stroke-[#38f5ff]/60 stroke-[4px]" />
+                    <line x1="120" y1="20" x2="120" y2="50" class="stroke-[#38f5ff]/60 stroke-[4px]" />
+                    <circle id="cabeza" class="parte-cuerpo hidden fill-none stroke-[#ff3bd4] stroke-[4px]" cx="120" cy="70" r="20" />
+                    <line id="tronco" class="parte-cuerpo hidden stroke-[#ff3bd4] stroke-[4px]" x1="120" y1="90" x2="120" y2="150" />
+                    <line id="brazo-izq" class="parte-cuerpo hidden stroke-[#ff3bd4] stroke-[4px]" x1="120" y1="110" x2="90" y2="130" />
+                    <line id="brazo-der" class="parte-cuerpo hidden stroke-[#ff3bd4] stroke-[4px]" x1="120" y1="110" x2="150" y2="130" />
+                    <line id="pierna-izq" class="parte-cuerpo hidden stroke-[#ff3bd4] stroke-[4px]" x1="120" y1="150" x2="90" y2="190" />
+                    <line id="pierna-der" class="parte-cuerpo hidden stroke-[#ff3bd4] stroke-[4px]" x1="120" y1="150" x2="150" y2="190" />
+                </svg>
+            </section>
+
+            <section aria-label="Partida" class="flex min-w-0 flex-col">
+                <dl aria-label="Estadísticas de la sesión" class="mb-2 grid grid-cols-3 gap-2 rounded-lg border border-[#38f5ff]/25 bg-[#11142b] p-2 text-center sm:gap-4 [@media(max-height:650px)]:mb-1.5 [@media(max-height:650px)]:py-1">
+                    <div>
+                        <dt class="text-xs font-bold uppercase text-[#b6c5e3] min-[600px]:landscape:[@media(max-height:450px)]:text-[10px]">Partidas</dt>
+                        <dd id="partidas" class="mt-1 font-mono text-xl font-medium [@media(max-height:650px)]:mt-0 min-[600px]:landscape:[@media(max-height:450px)]:text-lg min-[600px]:landscape:[@media(max-height:450px)]:leading-[1.2] text-[#38f5ff]">0</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase text-[#c6ff00]/75 min-[600px]:landscape:[@media(max-height:450px)]:text-[10px]">Ganadas</dt>
+                        <dd id="ganadas" class="mt-1 font-mono text-xl font-medium [@media(max-height:650px)]:mt-0 min-[600px]:landscape:[@media(max-height:450px)]:text-lg min-[600px]:landscape:[@media(max-height:450px)]:leading-[1.2] text-[#c6ff00]">0</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-bold uppercase text-[#ff79e3]/75 min-[600px]:landscape:[@media(max-height:450px)]:text-[10px]">Perdidas</dt>
+                        <dd id="perdidas" class="mt-1 font-mono text-xl font-medium [@media(max-height:650px)]:mt-0 min-[600px]:landscape:[@media(max-height:450px)]:text-lg min-[600px]:landscape:[@media(max-height:450px)]:leading-[1.2] text-[#ff79e3]">0</dd>
+                    </div>
+                </dl>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="rounded-lg border-2 border-[#38f5ff]/40 bg-[#c6ff00]/10 text-[#c6ff00] px-3 py-2 text-left [@media(max-height:650px)]:px-2.5 [@media(max-height:650px)]:py-1">
+                        <p class="text-xs font-bold uppercase text-[#c6ff00]/75 min-[600px]:landscape:[@media(max-height:450px)]:text-[10px]">Aciertos</p>
+                        <p class="text-2xl font-bold leading-[1.2] min-[600px]:landscape:[@media(max-height:450px)]:text-lg"><span id="aciertos">0</span></p>
+                    </div>
+                    <div class="rounded-lg border-2 border-[#38f5ff]/40 bg-[#ff3bd4]/10 text-[#ff79e3] px-3 py-2 text-left [@media(max-height:650px)]:px-2.5 [@media(max-height:650px)]:py-1">
+                        <p class="text-xs font-bold uppercase text-[#ff79e3]/75 min-[600px]:landscape:[@media(max-height:450px)]:text-[10px]">Errores</p>
+                        <p class="text-2xl font-bold leading-[1.2] min-[600px]:landscape:[@media(max-height:450px)]:text-lg"><span id="error">0</span><span class="font-mono text-base"> / 6</span></p>
+                    </div>
+                </div>
+
+                <div class="my-2.5 flex min-h-[76px] flex-col items-center justify-center border-y-2 border-dashed border-[#38f5ff]/25 px-2 py-2 text-center md:my-4 md:min-h-[100px] min-[600px]:landscape:my-4 min-[600px]:landscape:min-h-[100px] [@media(max-height:650px)]:!my-1.5 [@media(max-height:650px)]:!min-h-[64px] [@media(max-height:650px)]:py-1 min-[600px]:landscape:[@media(max-height:450px)]:!my-1 min-[600px]:landscape:[@media(max-height:450px)]:!min-h-[50px]">
+                    <p id="estado" class="mb-1 min-h-6 text-xl font-semibold text-[#38f5ff] [@media(max-height:650px)]:!text-base" aria-live="polite">Preparado.</p>
+                    <p id="ayuda-inicio" class="text-sm text-[#b6c5e3]">Pulsa Nueva partida para comenzar</p>
+                    <div id="palabra" class="max-w-full text-[#38f5ff] [overflow-wrap:anywhere] font-mono text-[clamp(18px,4vw,30px)] font-medium"></div>
+                </div>
+
+                <div class="mt-auto">
+                    <h2 class="mb-1.5 text-left text-xs font-bold uppercase text-[#c6ff00]">Teclado · A—Z</h2>
+                    <footer id="teclado" class="grid grid-cols-7 gap-1.5 sm:grid-cols-9 sm:gap-2 min-[600px]:landscape:[@media(max-height:450px)]:grid-cols-9 min-[600px]:landscape:[@media(max-height:450px)]:gap-1" aria-label="Letras">
+                    </footer>
+                </div>
+            </section>
+        </main>
+    </div>
+    <dialog id="resultado" aria-labelledby="resultado-titulo" aria-describedby="resultado-mensaje" class="m-auto overflow-visible w-[calc(100%-2rem)] max-w-md rounded-xl border-2 border-[#38f5ff] bg-[#11142b] p-6 text-center text-[#eefaff] shadow-[0_0_40px_#38f5ff30] backdrop:bg-black/65 sm:p-8">
+        <h2 id="resultado-titulo" class="text-3xl font-bold"></h2>
+        <p id="resultado-mensaje" class="mt-4 break-words text-[#b6c5e3]"></p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+            <button type="button" autofocus onclick="empezar()" class="rounded-lg bg-[#c6ff00] px-5 py-3 font-bold text-[#090b18] hover:bg-lime-200 focus:outline-none focus:ring-2 focus:ring-[#38f5ff] focus:ring-offset-2 focus:ring-offset-[#11142b]">Volver a jugar</button>
+            <button type="button" onclick="salirDelJuego()" class="rounded-lg border border-[#38f5ff] px-5 py-3 font-bold hover:bg-[#171c36] focus:outline-none focus:ring-2 focus:ring-[#38f5ff]">Salir del juego</button>
+        </div>
+    </dialog>
+    <script src="./js/palabras.js"></script>
+    <script>
+        const PALABRA = document.getElementById('palabra');
+        const TECLADO = document.getElementById('teclado');
+        const ERROR = document.getElementById('error');
+        const ACIERTOS = document.getElementById('aciertos');
+        const PARTIDAS = document.getElementById('partidas');
+        const GANADAS = document.getElementById('ganadas');
+        const PERDIDAS = document.getElementById('perdidas');
+        const ESTADO = document.getElementById('estado');
+        const RESULTADO = document.getElementById('resultado');
+        const RESULTADO_TITULO = document.getElementById('resultado-titulo');
+        const RESULTADO_MENSAJE = document.getElementById('resultado-mensaje');
+        let confeti = null;
+        let animacionesConfeti = [];
+
+        function limpiarCelebracion() {
+            animacionesConfeti.forEach(animacion => animacion.cancel());
+            animacionesConfeti = [];
+            if (confeti) confeti.remove();
+            confeti = null;
+        }
+
+        RESULTADO.addEventListener('close', limpiarCelebracion);
+        RESULTADO.addEventListener('cancel', evento => {
+            evento.preventDefault();
+            salirDelJuego();
+        });
+
+        function celebrarVictoria() {
+            limpiarCelebracion();
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const capa = document.createElement('div');
+            capa.className = 'pointer-events-none fixed inset-0 overflow-hidden';
+            capa.setAttribute('aria-hidden', 'true');
+            RESULTADO.appendChild(capa);
+            confeti = capa;
+            const cantidad = window.matchMedia('(min-width: 1024px)').matches ? 132
+                : window.matchMedia('(min-width: 640px)').matches ? 96 : 60;
+            const posicionesConfeti = [
+                'left-0', 'left-[5%]', 'left-[10%]', 'left-[15%]', 'left-[20%]',
+                'left-[25%]', 'left-[30%]', 'left-[35%]', 'left-[40%]', 'left-[45%]',
+                'left-1/2', 'left-[55%]', 'left-[60%]', 'left-[65%]', 'left-[70%]',
+                'left-[75%]', 'left-[80%]', 'left-[85%]', 'left-[90%]', 'left-[95%]'
+            ];
+
+            for (let i = 0; i < cantidad; i++) {
+                const particula = document.createElement('span');
+                particula.className = i % 2 === 0
+                    ? 'absolute -top-6 h-3 w-1.5 rounded-sm bg-[#38f5ff] shadow-[0_0_6px_#38f5ff80] sm:h-4 sm:w-2'
+                    : 'absolute -top-6 h-2 w-2 rounded-sm bg-[#c6ff00] shadow-[0_0_6px_#c6ff0080] sm:h-3 sm:w-2.5';
+                // Cubrir todo el ancho, con menos partículas en pantallas pequeñas.
+                particula.classList.add(posicionesConfeti[i % posicionesConfeti.length]);
+                capa.appendChild(particula);
+                const giro = Math.random() * 180;
+                const deriva = (Math.random() - 0.5) * 12;
+                const animacion = particula.animate([
+                    { transform: `translate(0, 0) rotate(${giro}deg)`, opacity: 0 },
+                    { opacity: 1, offset: 0.06 },
+                    { opacity: 1, offset: 0.8 },
+                    { transform: `translate(${deriva}vw, calc(100dvh + 48px)) rotate(${giro + 540}deg)`, opacity: 0 }
+                ], {
+                    duration: 2800 + Math.random() * 500,
+                    delay: Math.random() * 800,
+                    easing: 'linear',
+                    fill: 'both'
+                });
+                animacionesConfeti.push(animacion);
+            }
+            Promise.all(animacionesConfeti.map(animacion => animacion.finished))
+                .then(() => { if (confeti === capa) limpiarCelebracion(); })
+                .catch(() => {}); // Cerrar o reiniciar cancela la celebración.
+        }
+
+        const partesCuerpo = [
+            "#poste",      // Sin fallos
+            "#pierna-izq", // Fallo 1
+            "#pierna-der", // Fallo 2
+            "#tronco",     // Fallo 3
+            "#brazo-izq",  // Fallo 4
+            "#brazo-der",  // Fallo 5
+            "#cabeza"      // Fallo 6
+        ];
+
+        let palabraRandom = "";
+        let palabraAdivinada = [];
+
+        let intentos = 6;
+        let error = 0;
+        let aciertos = 0;
+        let partidas = 0;
+        let ganadas = 0;
+        let perdidas = 0;
+        let partidaActiva = false;
+        let temporizadorResultado = null;
+
+        function pintarSesion() {
+            PARTIDAS.textContent = partidas;
+            GANADAS.textContent = ganadas;
+            PERDIDAS.textContent = perdidas;
+        }
+
+        function registrarResultado(victoria) {
+            if (!partidaActiva) return;
+            partidaActiva = false;
+            partidas++;
+            if (victoria) ganadas++;
+            else perdidas++;
+            pintarSesion();
+            TECLADO.querySelectorAll('button').forEach(letra => {
+                letra.disabled = true;
+            });
+        }
+
+        function pintarErrores() {
+            const parte = document.querySelector(partesCuerpo[error]);
+            if (parte) {
+                parte.classList.remove("hidden");
+            }
+
+            ERROR.textContent = error;
+            ACIERTOS.textContent = aciertos;
+        }
+
+        function pintarPalabra() {
+            PALABRA.textContent = palabraAdivinada.join(' ');
+        }
+
+        function finalizarPartida(mensaje, colorEstado) {
+            ESTADO.textContent = mensaje;
+            ESTADO.classList.remove("text-[#b6c5e3]", "text-[#c6ff00]", "text-[#ff79e3]");
+            ESTADO.classList.add(colorEstado);
+            TECLADO.querySelectorAll('button').forEach(letra => {
+                letra.disabled = true;
+            });
+            RESULTADO_TITULO.textContent = error >= intentos ? '¡Has perdido!' : '¡Has ganado!';
+            RESULTADO_TITULO.classList.remove('text-[#c6ff00]', 'text-[#ff79e3]');
+            RESULTADO_TITULO.classList.add(colorEstado);
+            RESULTADO_MENSAJE.textContent = 'La palabra era ' + palabraRandom + '.';
+            clearTimeout(temporizadorResultado);
+            temporizadorResultado = setTimeout(() => {
+                temporizadorResultado = null;
+                if (!RESULTADO.open) RESULTADO.showModal();
+                if (error < intentos) celebrarVictoria();
+            }, 800);
+        }
+
+        function salirDelJuego() {
+            clearTimeout(temporizadorResultado);
+            temporizadorResultado = null;
+            partidaActiva = false;
+            partidas = 0;
+            ganadas = 0;
+            perdidas = 0;
+            pintarSesion();
+            limpiarCelebracion();
+            if (RESULTADO.open) RESULTADO.close();
+            palabraRandom = '';
+            palabraAdivinada = [];
+            error = 0;
+            aciertos = 0;
+            document.querySelectorAll('.parte-cuerpo').forEach(parte => {
+                parte.classList.add('hidden');
+            });
+            pintarErrores();
+            pintarPalabra();
+            TECLADO.replaceChildren();
+            ESTADO.textContent = 'Preparado.';
+            ESTADO.className = 'mb-1 min-h-6 text-xl font-semibold text-[#38f5ff] [@media(max-height:650px)]:!text-base';
+            document.getElementById('ayuda-inicio').classList.remove('hidden');
+            document.querySelector('header button').focus();
+        }
+
+        function empezar() {
+            clearTimeout(temporizadorResultado);
+            temporizadorResultado = null;
+            partidaActiva = true;
+            limpiarCelebracion();
+            if (RESULTADO.open) RESULTADO.close();
+            document.getElementById('ayuda-inicio').classList.add('hidden');
+            ESTADO.className = 'mb-1 min-h-6 text-sm font-semibold text-[#b6c5e3] [@media(max-height:650px)]:!text-base';
+            const candidatas = palabras.filter(palabra => palabra.toUpperCase() !== palabraRandom);
+            const disponibles = candidatas.length ? candidatas : palabras;
+            palabraRandom = disponibles[Math.floor(Math.random() * disponibles.length)].toUpperCase();
+            palabraAdivinada = Array(palabraRandom.length).fill('_');
+
+            console.log('Palabra Random', palabraRandom);
+            // Ocultamos todas las partes del cuerpo
+            document.querySelectorAll(".parte-cuerpo").forEach(parte => {
+                parte.classList.add("hidden");
+            });
+            error = 0;
+            aciertos = 0;
+            ESTADO.textContent = "Encuentra las letras";
+            ESTADO.classList.remove("text-[#c6ff00]", "text-[#ff79e3]");
+            ESTADO.classList.add("text-[#b6c5e3]");
+            pintarErrores();
+            pintarPalabra();
+            teclado();
+            TECLADO.querySelector('button').focus({ preventScroll: true });
+        }
+
+        function teclado() {
+            TECLADO.innerHTML = '';
+            for (let letra of LETRAS) {
+                let button = document.createElement("button");
+                button.id = letra;
+                button.type = "button";
+                button.className = "grid h-[clamp(34px,5.5dvh,48px)] w-full place-items-center [@media(max-height:650px)]:!h-[34px] min-[600px]:landscape:[@media(max-height:450px)]:!h-[30px] rounded-md border-2 border-[#38f5ff]/40 bg-[#171c36] text-sm font-bold text-[#eefaff] hover:border-[#c6ff00] hover:bg-[#c6ff00] hover:text-[#090b18] transition-colors focus:outline-none focus:ring-2 focus:ring-[#38f5ff] disabled:cursor-not-allowed disabled:border-[#38f5ff]/10 disabled:bg-[#101426] disabled:text-[#73809f] disabled:hover:border-[#38f5ff]/10 data-[resultado=acierto]:!bg-[#c6ff00] data-[resultado=acierto]:!border-[#c6ff00] data-[resultado=acierto]:!text-[#090b18] data-[resultado=fallo]:!bg-[#ff79e3] data-[resultado=fallo]:!border-[#ff79e3] data-[resultado=fallo]:!text-[#090b18]";
+                button.addEventListener("click", () => pulsar(letra));
+                button.textContent = letra;
+                TECLADO.appendChild(button);
+            }
+        }
+
+        function pulsar(valor) {
+            const boton = document.getElementById(valor);
+            if (!partidaActiva || !boton || boton.disabled) return;
+            let encontrada = false;
+
+            boton.disabled = true;
+            for (let i = 0; i < palabraRandom.length; i++) {
+                if (palabraRandom[i] === valor) {
+                    palabraAdivinada[i] = valor;
+                    encontrada = true;
+                }
+            }
+
+            boton.dataset.resultado = encontrada ? 'acierto' : 'fallo';
+            boton.setAttribute('aria-label', valor + (encontrada ? ': acierto' : ': fallo'));
+
+            if (encontrada) {
+                aciertos++;
+                pintarPalabra();
+                ACIERTOS.textContent = aciertos;
+                if (palabraAdivinada.join('') === palabraRandom) {
+                    registrarResultado(true);
+                    ESTADO.textContent = "¡Palabra resuelta!";
+                    ESTADO.className =
+                        "mb-1 min-h-6 text-center font-bold text-xl text-[#c6ff00] [@media(max-height:650px)]:!text-base";
+
+                    finalizarPartida("¡Palabra resuelta!", "text-[#c6ff00]");
+                }
+            } else {
+                error++;
+                pintarErrores();
+                if (error >= intentos) {
+                    registrarResultado(false);
+                    palabraAdivinada = palabraRandom.split('');
+                    pintarPalabra();
+                    finalizarPartida("La palabra era " + palabraRandom + ".", "text-[#ff79e3]");
+                }
+            }
+        }
+
+    </script>
+
+
+</body>
+
+</html>
